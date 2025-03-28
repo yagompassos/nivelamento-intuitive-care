@@ -1,0 +1,4 @@
+pandas
+pdfplumber
+curl_cffi
+beautifulsoup4

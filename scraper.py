@@ -2,7 +2,6 @@ from curl_cffi import requests
 from bs4 import BeautifulSoup
 import zipfile
 import os
-import time
 
 url = "https://www.gov.br/ans/pt-br/acesso-a-informacao/participacao-da-sociedade/atualizacao-do-rol-de-procedimentos"
 
@@ -33,11 +32,6 @@ def main():
         response = session.get(url)
         soup = BeautifulSoup(response.content, "html.parser")
 
-        # Limpa arquivos antigos
-        for f in ['anexo1.pdf', 'anexo2.pdf', 'Anexos.zip']:
-            if os.path.exists(f):
-                os.remove(f)
-
         anexo1_link = None
         anexo2_link = None
         
@@ -52,16 +46,18 @@ def main():
                 print(f"Anexo I encontrado: {anexo1_link}")
 
         success = True
+
+        os.makedirs('Arquivos_Gerados', exist_ok=True)
         
         if anexo1_link:
-            if not download_pdf(session, anexo1_link, "anexo1.pdf"):
+            if not download_pdf(session, anexo1_link, "Arquivos_Gerados/anexo1.pdf"):
                 success = False
         else:
             print("Anexo I não encontrado")
             success = False
 
         if anexo2_link:
-            if not download_pdf(session, anexo2_link, "anexo2.pdf"):
+            if not download_pdf(session, anexo2_link, "Arquivos_Gerados/anexo2.pdf"):
                 success = False
         else:
             print("Anexo II não encontrado")
@@ -69,12 +65,12 @@ def main():
 
         if success:
             print("Criando arquivo ZIP...")
-            with zipfile.ZipFile('Anexos.zip', 'w') as zipf:
-                if os.path.exists('anexo1.pdf'):
-                    zipf.write('anexo1.pdf')
-                if os.path.exists('anexo2.pdf'):
-                    zipf.write('anexo2.pdf')
-            print("Processo concluído com sucesso!")
+            with zipfile.ZipFile('Arquivos_Gerados/Anexos.zip', 'w') as zipf:
+                if os.path.exists('Arquivos_Gerados/anexo1.pdf'):
+                    zipf.write('Arquivos_Gerados/anexo1.pdf')
+                if os.path.exists('Arquivos_Gerados/anexo2.pdf'):
+                    zipf.write('Arquivos_Gerados/anexo2.pdf')
+            print("Processo concluído com sucesso! A pasta se encontra dentro de 'Arquivos_Gerados'.")
         else:
             print("Processo concluído com erros. Verifique os logs acima.")
 
